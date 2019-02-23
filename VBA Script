@@ -1,7 +1,8 @@
 Sub StockDataAnalysisLoop()
 
-' This script takes <2 minutes to run on each page of the full stock data
-' Total runtime on my computer = 5 min 35 seconds.
+'README:
+' This script takes <2 minutes to run per page (of the full stock data)
+' Total runtime for the 3 sheets = 5 min 35 seconds.
 ' During the runtime, click "okay" when the pop-up box appears. 
 
 
