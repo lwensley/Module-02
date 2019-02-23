@@ -1,0 +1,148 @@
+Sub StockDataAnalysisLoop()
+
+'README:
+' This script takes <2 minutes to run per page (of the full stock data)
+' Total runtime for the 3 sheets = 5 min 35 seconds.
+' During the runtime, click "okay" when the pop-up box appears. 
+
+
+
+' 0  Create loop
+
+        Sheets(1).Select
+
+        Dim WS_Count As Integer
+        Dim I As Integer
+
+         ' Set WS_Count equal to the number of worksheets in the active
+         ' workbook.
+         WS_Count = ActiveWorkbook.Worksheets.Count
+
+         ' Begin the loop.
+         For I = 1 To WS_Count
+         
+    
+' 1 Create Summary
+
+    ' 1.1 Row labels
+        ActiveSheet.Columns("A:A").Select
+        Selection.Copy
+        ActiveSheet.Columns("I:I").Select
+        ActiveSheet.Paste
+        Application.CutCopyMode = False
+        ActiveSheet.Range("$I:$I").RemoveDuplicates Columns:=1, Header:= _
+        xlNo
+    
+     ' 1.2 Column headings
+        Range("I1").Select
+        ActiveCell.FormulaR1C1 = "Ticker"
+    
+        Range("J1").Select
+        ActiveCell.FormulaR1C1 = "Yearly Change"
+    
+        Range("K1").Select
+        ActiveCell.FormulaR1C1 = "Percent Change"
+    
+        Range("L1").Select
+        ActiveCell.FormulaR1C1 = "Total Stock Volume"
+    
+    ' 1.3 Count rows
+        Dim lastrow As Integer
+        Range("I1").Select
+        lastrow = Range(Selection, Selection.End(xlDown)).Rows.Count
+    
+    
+    ' 1.4 Data formulas
+        Range("J2").Select
+        ActiveCell.FormulaR1C1 = "=LOOKUP(2,1/(C[-9]=RC[-1]),C[-4])-VLOOKUP(RC[-1],C[-9]:C[-3],3,TRUE)"
+        Range("J2").Select
+        Selection.AutoFill Destination:=Range("J2", "J" & lastrow)
+
+        Range("K2").Select
+        ActiveCell.FormulaR1C1 = "=iferror(RC[-1]/VLOOKUP(RC[-2],C[-10]:C[-4],3,TRUE),0)"
+        Range("K2").Select
+        Selection.AutoFill Destination:=Range("K2", "K" & lastrow)
+    
+        Range("L2").Select
+        ActiveCell.FormulaR1C1 = "=SUMIFS(C[-5],C[-11],RC[-3])"
+        Range("L2").Select
+        Selection.AutoFill Destination:=Range("L2", "L" & lastrow)
+
+    ' 1.5 Formatting
+        Columns("J:J").Select
+        Selection.Style = "Currency"
+    
+        Columns("K:K").Select
+        Selection.Style = "Percent"
+    
+        Columns("L:L").Select
+        Selection.Style = "Comma"
+        Selection.NumberFormat = "_(* #,##0_);_(* (#,##0);_(* ""-""??_);_(@_)"
+    
+    '1.5.1 Conditional Formatting
+        Range("J2").Select
+        Range(Selection, Selection.End(xlDown)).Select
+    
+        With Selection.FormatConditions.Add(xlCellValue, xlLess, "=0")
+                With .Interior
+                        .PatternColorIndex = xlAutomatic
+                        .Color = RGB(223, 172, 180)
+                End With
+        End With
+    
+        With Selection.FormatConditions.Add(xlCellValue, xlGreater, "=0")
+                With .Interior
+                        .PatternColorIndex = xlAutomatic
+                        .Color = RGB(162, 213, 186)
+            End With
+        End With
+    
+' 2 Create Exec Summary
+
+    ' 2.1 Labels and Headers
+        Range("O2").Select
+        ActiveCell.FormulaR1C1 = "Greatest % Increase"
+    
+        Range("O3").Select
+        ActiveCell.FormulaR1C1 = "Greatest % Decrease"
+    
+        Range("O4").Select
+        ActiveCell.FormulaR1C1 = "Greatest Total Volume"
+    
+        Range("P1").Select
+        ActiveCell.FormulaR1C1 = "Ticker"
+    
+        Range("Q1").Select
+        ActiveCell.FormulaR1C1 = "Value"
+    
+    '2.2 Formulas
+        Range("Q2").Select
+        ActiveCell.FormulaR1C1 = "=MAX(C[-6])"
+    
+        Range("Q3").Select
+        ActiveCell.FormulaR1C1 = "=MIN(C[-6])"
+    
+        Range("Q4").Select
+        ActiveCell.FormulaR1C1 = "=MAX(C[-5])"
+    
+        Range("P2").Select
+        ActiveCell.FormulaR1C1 = "=VLOOKUP(RC[1],CHOOSE({1,2},C[-5],C[-7]),2,0)"
+    
+        Range("P3").Select
+        ActiveCell.FormulaR1C1 = "=VLOOKUP(RC[1],CHOOSE({1,2},C[-5],C[-7]),2,0)"
+    
+        Range("P4").Select
+        ActiveCell.FormulaR1C1 = "=VLOOKUP(RC[1],CHOOSE({1,2},C[-4],C[-7]),2,0)"
+    
+    ' 2.3 Formatting
+        Columns("A:Q").Select
+        Columns("A:Q").EntireColumn.AutoFit
+
+' 0 Complete Loop
+        If Not I = WS_Count Then
+        ActiveSheet.Next.Select
+        End If
+
+    Next I
+
+End Sub
